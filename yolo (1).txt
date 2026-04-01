@@ -1,0 +1,1506 @@
+# Simple Reflex Agent
+class Environment:
+    def __init__(self, traffic_status = "Heavy Traffic"):
+        self.traffic_status = traffic_status
+
+    def get_percept(self):
+        return self.traffic_status
+
+
+class SimpleReflexAgent:
+    def __init__(self):
+        pass
+
+    def act(self, percept):
+        if percept == "Heavy Traffic":
+            return "Extend Green Signal Time"
+        else:
+            return "Normal Green Signal Time"
+
+      
+def run_program(agent, env):
+    percept = env.get_percept()
+    action = agent.act(percept)
+    print(f"Percept: {percept} ==> Action: {action}")
+
+
+def main():
+    agent = SimpleReflexAgent()
+    env1 = Environment("Heavy Traffic")
+    env2 = Environment("Light Traffic")
+    run_program(agent, env1)
+    run_program(agent, env2)
+
+main()
+
+
+# Model Based Agent
+import random
+
+class Environment:
+    def __init__(self):
+        self.student_present = random.choice(["Yes", "No"])
+        self.light_status = "OFF"
+
+    def get_percept(self):
+        return {'student': self.student_present, 'light': self.light_status}
+    
+    def update_student_presence(self):
+        self.student_present = random.choice(["Yes", "No"])
+
+    def light_on(self):
+        self.light_status = "ON"
+
+    def light_off(self):
+        self.light_status = "OFF"
+
+     
+class ModelBasedAgent:
+    def __init__(self):
+        self.model = {'prev_student': None, 'prev_light': None, 'curr_student': None, 'curr_light': None}
+
+    def act(self, percept):
+        self.model['prev_student'] = self.model['curr_student']
+        self.model['prev_light'] = self.model['curr_light']
+        self.model['curr_student'] = percept['student']
+        self.model['curr_light'] = percept['light']
+
+        if self.model['curr_student'] == "Yes" and self.model['curr_light'] == "OFF":
+            return "Turn light ON"
+        elif self.model['curr_student'] == "No" and self.model['curr_light'] == "ON":
+            return "Turn light OFF"
+        else:
+            return "No action"
+
+
+def run_program(agent, env, steps):
+    for i in range(steps):
+        print(f"\nStep {i + 1}:")
+
+        env.update_student_presence()
+        percept = env.get_percept()
+        action = agent.act(percept)
+
+        if action == "Turn light ON":
+            env.light_on()
+        elif action == "Turn light OFF":
+            env.light_off()
+
+        print(f"Percept: {percept}")
+        print(f"Action: {action}")
+        print(f"Agent Model: {agent.model}")
+
+
+def main():
+    agent = ModelBasedAgent()
+    env = Environment()
+    run_program(agent, env, steps=8)
+
+main()
+
+
+# Goal Based Agent
+class GoalBasedAgent:
+    def __init__(self):
+        self.goal = 'Clean'
+
+    def formulate_goal(self, percept):
+        if percept == 'Dirty':
+            self.goal = 'Clean'
+        else:
+            self.goal = 'No action needed'
+
+    def act(self, percept):
+        self.formulate_goal(percept)
+        if self.goal == 'Clean':
+            return 'Clean the room'
+        else:
+            return 'Room is clean'
+
+
+class Environment:
+    def __init__(self, state='Dirty'):
+        self.state = state
+
+    def get_percept(self):
+        return self.state
+
+    def clean_room(self):
+        self.state = 'Clean'
+
+
+def run_agent(agent, environment, steps):
+    for step in range(steps):
+        percept = environment.get_percept()
+        action = agent.act(percept)
+        print(f"Step {step + 1}: Percept - {percept}, Action - {action}")
+        if percept == 'Dirty':
+            environment.clean_room()
+
+
+agent = GoalBasedAgent()
+environment = Environment()
+run_agent(agent, environment, 5)
+
+
+
+# Goal Based Agent LT
+class GoalBasedAgent:
+    def __init__(self, subjects):
+        self.subjects = subjects
+        self.completed_subjects = []
+
+    def action(self):
+        for subject in self.subjects:
+            if subject not in self.completed_subjects:
+                print(f"Studying {subject} ...")
+                self.completed_subjects.append(subject)
+                print(f"Study session for {subject} completed.\n")
+
+        if len(self.completed_subjects) == len(self.subjects):
+            print("Goal achieved! All subjects have been completed successfully!")
+
+
+def main():
+    agent = GoalBasedAgent(["AI", "Maths", "Physics"])
+    agent.action()
+
+main()
+
+
+# Utility Based Agent
+class UtilityBasedAgent:
+    def __init__(self, restaurants):
+        self.restaurants = restaurants
+
+    def act(self):
+        utilities = {}
+        for rest_name, rest_values in self.restaurants.items():
+            utilities[rest_name] = rest_values['Rating'] - rest_values['Distance']
+            print(f"Restaurant {rest_name} ==> Utility: {utilities[rest_name]}")
+
+        # key = utilities.get ensures that the max() compares dictionary values, not keys
+        best_restaurant = max(utilities, key = utilities.get)
+        print(f"\nSelected Restaurant: {best_restaurant}")
+
+
+def main():
+    agent = UtilityBasedAgent({'A': {"Distance": 3, "Rating": 7}, 'B': {"Distance": 5, "Rating": 9}})
+    agent.act()
+
+main()
+
+
+# Learning Based Agent
+import random
+
+class LearningBasedAgent:
+    def __init__(self):
+        self.Q = {'Play': 0, 'Rest': 0}
+        self.alpha = 0.1
+        self.actions_rewards = {'Play': 5, 'Rest': 1}
+
+    def update_Q(self, action):
+        self.Q[action] += self.alpha * (self.actions_rewards[action] - self.Q[action])
+
+    def run(self, steps=10):
+        for i in range(steps):
+            action = random.choice(list(self.actions_rewards.keys()))
+            reward = self.actions_rewards[action]
+            self.update_Q(action)
+            print(f"Step {i + 1}")
+            print(f"Action: {action} ==> Reward: +{reward}\n")
+
+        print(f"\nQ-Table has been updated!")
+        print(self.Q)
+
+
+def main():
+    agent = LearningBasedAgent()
+    agent.run()
+
+main()
+
+
+# Lab Task Agent
+class Environment:
+    def __init__(self):
+        self.rooms = {"a": "safe", "b": "safe", "c": "fire", "d": "safe", "e": "fire", "f": "safe", "g": "safe", "h": "safe", "j": "fire"}
+        self.path = ["a", "b", "c", "d", "e", "f", "g", "h", "j"]
+
+    def get_percept(self, room):
+        return self.rooms[room]
+    
+    def extinguish_fire(self, room):
+        self.rooms[room] = "safe"
+
+    def display_env(self):
+        print("Current Environment State:")
+        for i in range(0, 9):
+            if self.rooms[self.path[i]] == "safe":
+                print("🟩", end=" ")
+            else:
+                print("🔥", end=" ")
+
+            if (i % 3) == 2:
+                print()
+        print()
+
+
+class FireFighterRobot:
+    def __init__(self):
+        self.path = ["a", "b", "c", "d", "e", "f", "g", "h", "j"]
+
+    def run(self, env):
+        for room in self.path:
+            print(f"Robot has moved to Room \'{room}\'.")
+            percept = env.get_percept(room)
+            if percept == "safe":
+                print(f"Room \'{room}\' is safe (no fires).")
+            else:
+                print(f"Fire detected in Room \'{room}\'. Extinguishing the fire...")
+                env.extinguish_fire(room)
+                print(f"Room \'{room}\' is now safe. Moving on.")
+
+            env.display_env()
+
+
+def main():
+    env = Environment()
+    agent = FireFighterRobot()
+    agent.run(env)
+
+main()
+
+
+# BFS
+def bfs(graph, start, goal):
+    visited = []
+    queue = []
+    came_from = {start: None}
+
+    visited.append(start)
+    queue.append(start)
+
+    while queue:
+        node = queue.pop(0)
+        # print(node, end=" ")
+
+        if node == goal:
+            path = []
+            while node is not None:
+                path.append(node)
+                node = came_from[node]
+            path.reverse()
+            print(f"\nGoal found! Path: {path}")
+            return
+
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                visited.append(neighbour)
+                came_from[neighbour] = node
+                queue.append(neighbour)
+
+    print("\nGoal not found")
+
+
+# Create Graph
+maze = [
+    [1, 1, 0],
+    [1, 1, 1],
+    [0, 1, 1]
+]
+directions = [(0, 1), (1, 0)]
+
+def create_graph(maze):
+    graph = {}
+    rows = len(maze)
+    cols = len(maze[0])
+
+    for i in range(rows):
+        for j in range(cols):
+            if maze[i][j] == 1:
+                neighbors = []
+                for dx, dy in directions:
+                    nx, ny = i + dx, j + dy
+                    if 0 <= nx < rows and 0 <= ny < cols and maze[nx][ny] == 1:
+                        neighbors.append((nx, ny))
+                graph[(i, j)] = neighbors
+
+    return graph
+
+
+# DFS (Stack)
+def dfs(graph, start, goal):
+    visited = []
+    stack = []
+    came_from = {start: None}
+
+    visited.append(start)
+    stack.append(start)
+
+    while stack:
+        node = stack.pop()
+        print(node, end=" ")
+
+        if node == goal:
+            path = []
+            while node is not None:
+                path.append(node)
+                node = came_from[node]
+            path.reverse()
+            print(f"\nGoal found!Path: {path}")
+            return
+
+        for neighbour in reversed(graph[node]):
+            if neighbour not in visited:
+                visited.append(neighbour)
+                came_from[neighbour] = node 
+                stack.append(neighbour)
+
+    print("\nGoal not found")
+
+
+# DFS, DLS, IDS
+def dls(graph, start, goal, depth_limit):
+    visited = []
+
+    def dfs(node, depth):
+        if depth > depth_limit:
+            return None
+
+        visited.append(node)
+        if node == goal:
+            return visited.copy()
+
+        for neighbor in graph.get(node, []):
+            if neighbor not in visited:
+                path = dfs(neighbor, depth + 1)
+                if path:
+                    return path
+
+        visited.pop()
+        return None
+
+    return dfs(start, 0)
+
+
+def ids(graph, start, goal, max_depth):
+    for depth in range(max_depth + 1):
+        print(f"Trying depth limit: {depth}")
+        result = dls(graph, start, goal, depth)
+
+        if result:
+            print("Goal found! Path:", result)
+            return result
+
+    print("Goal not found within max depth")
+    return None
+
+# UCS
+def ucs(graph, start, goal):
+    frontier = [(start, 0)]
+    visited = set()
+    cost_so_far = {start: 0}
+    came_from = {start: None}
+
+    while frontier:
+        frontier.sort(key=lambda x: x[1])
+
+        current_node, current_cost = frontier.pop(0)
+        if current_node in visited:
+            continue
+
+        visited.add(current_node)
+
+        if current_node == goal:
+            path = []
+            while current_node is not None:
+                path.append(current_node)
+                current_node = came_from[current_node]
+            path.reverse()
+            print(f"Goal found with UCS. Path: {path}, Total Cost: {cost_so_far[goal]}")
+            return
+
+        for neighbor, cost in graph[current_node].items():
+            new_cost = cost_so_far[current_node] + cost
+            if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                cost_so_far[neighbor] = new_cost
+                came_from[neighbor] = current_node
+                frontier.append((neighbor, new_cost))
+
+    print("Goal not found")
+
+
+# ############### AGENT BASED BFS
+
+class BFSAgent:
+    def __init__(self, goal):
+        self.goal = goal
+
+    def search(self, graph, start):
+        from collections import deque
+
+        visited = set()
+        queue = deque([[start]])
+
+        while queue:
+            path = queue.popleft()
+            node = path[-1]
+
+            print("Visiting:", node)
+
+            if node == self.goal:
+                return path
+
+            if node not in visited:
+                visited.add(node)
+
+                for neighbor in graph.get(node, []):
+                    queue.append(path + [neighbor])
+
+        return None
+
+
+
+# #################### AGENT BASED DFS
+
+class DFSAgent:
+    def __init__(self, goal):
+        self.goal = goal
+
+    def search(self, graph, start):
+        stack = [[start]]
+        visited = set()
+
+        while stack:
+            path = stack.pop()
+            node = path[-1]
+
+            print("Visiting:", node)
+
+            if node == self.goal:
+                return path
+
+            if node not in visited:
+                visited.add(node)
+
+                for neighbor in reversed(graph.get(node, [])):
+                    stack.append(path + [neighbor])
+
+        return None
+
+
+
+# ##################### AGENT BASED DLS
+
+class DLSAgent:
+    def __init__(self, goal, limit):
+        self.goal = goal
+        self.limit = limit
+
+    def search(self, graph, node, depth, path):
+        if depth < 0:
+            return False
+
+        path.append(node)
+
+        if node == self.goal:
+            return True
+
+        for neighbor in graph.get(node, []):
+            if self.search(graph, neighbor, depth - 1, path):
+                return True
+
+        path.pop()
+        return False
+
+
+
+# #################### AGENT BASED UCS
+
+import heapq
+
+class UCSAgent:
+    def __init__(self, goal):
+        self.goal = goal
+
+    def search(self, graph, start):
+        pq = []
+        heapq.heappush(pq, (0, [start]))
+        visited = set()
+
+        while pq:
+            cost, path = heapq.heappop(pq)
+            node = path[-1]
+
+            print("Visiting:", node, "Cost:", cost)
+
+            if node == self.goal:
+                return path, cost
+
+            if node not in visited:
+                visited.add(node)
+
+                for neighbor, weight in graph.get(node, {}).items():
+                    heapq.heappush(pq, (cost + weight, path + [neighbor]))
+
+        return None
+
+
+
+# Best First Search
+def best_first_search(graph, start, goal):
+    frontier = [(start, 0)]
+    visited = set()
+    came_from = {start: None}
+    cost_so_far = {start: 0}
+
+    while frontier:
+        frontier.sort(key=lambda x: x[1])
+
+        current_node, current_cost = frontier.pop(0)
+        if current_node in visited:
+            continue
+
+        visited.add(current_node)
+
+        if current_node == goal:
+            path = []
+            while current_node is not None:
+                path.append(current_node)
+                current_node = came_from[current_node]
+            path.reverse()
+
+            print(f"\nGoal found with Best First Search.")
+            print(f"Path: {path}")
+            print(f"Total Cost: {cost_so_far[goal]}")
+            return
+
+        for neighbor, cost in graph[current_node].items():
+            new_cost = cost_so_far[current_node] + cost
+            if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                cost_so_far[neighbor] = new_cost
+                came_from[neighbor] = current_node
+                frontier.append((neighbor, cost))
+
+    print("\nGoal not found")
+
+# Greedy BFS
+def greedy_bfs(graph, start, goal, heuristic):
+    frontier = [(start, heuristic[start])]
+    visited = set()
+    came_from = {start: None}
+    cost_so_far = {start: 0}
+
+    while frontier:
+        frontier.sort(key=lambda x: x[1])
+        current_node, _ = frontier.pop(0)
+
+        if current_node in visited:
+            continue
+
+        visited.add(current_node)
+
+        if current_node == goal:
+            path = []
+            node = current_node
+            while node is not None:
+                path.append(node)
+                node = came_from[node]
+            path.reverse()
+            print(f"\nGoal found with GBFS.")
+            print(f"Path: {path}")
+            print(f"Total Cost: {cost_so_far[goal]}")
+            return path, cost_so_far[goal]
+
+        # expand neighbors
+        for neighbor, edge_cost in graph[current_node].items():
+            if neighbor not in visited:
+                came_from[neighbor] = current_node
+                cost_so_far[neighbor] = cost_so_far[current_node] + edge_cost
+                frontier.append((neighbor, heuristic[neighbor]))
+
+    print("\nGoal not found")
+    return None, None
+
+# A*
+def a_star(graph, start, goal, heuristic):
+    frontier = [(start, 0 + heuristic[start])]
+    visited = set()
+    came_from = {start: None}
+    g_costs = {start: 0}
+
+    while frontier:
+        frontier.sort(key=lambda x: x[1])
+        current_node, current_f = frontier.pop(0)
+
+        if current_node in visited:
+            continue
+
+        visited.add(current_node)
+        if current_node == goal:
+            path = []
+            node = current_node
+            while node is not None:
+                path.append(node)
+                node = came_from[node]
+            path.reverse()
+            total_cost = g_costs[goal]
+            print(f"\nGoal found with A*. Path: {path}")
+            print(f"Total Cost: {total_cost}")
+            return path, total_cost
+
+        for neighbor, cost in graph[current_node].items():
+            new_g_cost = g_costs[current_node] + cost  # g(n)
+            f_cost = new_g_cost + heuristic[neighbor]  # f(n) = g(n) + h(n)
+            if neighbor not in g_costs or new_g_cost < g_costs[neighbor]:
+                g_costs[neighbor] = new_g_cost
+                came_from[neighbor] = current_node
+                frontier.append((neighbor, f_cost))
+
+    print("\nGoal not found")
+    return None, None
+
+#----------------------- GREEDY BFS WITH GRAPH--------------------------
+graph = {
+    'A': {'B': 2, 'C': 1},
+    'B': {'D': 4, 'E': 3},
+    'C': {'F': 1, 'G': 5},
+    'D': {'H': 2},
+    'E': {},
+    'F': {'I': 6},
+    'G': {},
+    'H': {},
+    'I': {}
+}
+
+heuristic = {
+    'A': 7, 'B': 6, 'C': 5, 'D': 4,
+    'E': 7, 'F': 3, 'G': 6, 'H': 2, 'I': 0
+}
+
+def greedy_best_first_search(graph, start, goal):
+    frontier = [(start, heuristic[start])]
+    visited = set()
+    parent = {start: None}
+
+    while frontier:
+        frontier.sort(key=lambda x: x[1])
+        current, _ = frontier.pop(0)
+
+        if current in visited:
+            continue
+
+        print(current, end=" ")
+        visited.add(current)
+
+        if current == goal:
+            path = []
+            while current:
+                path.append(current)
+                current = parent[current]
+            print("\nPath:", path[::-1])
+            return
+
+        for neighbor in graph[current]:
+            if neighbor not in visited:
+                parent[neighbor] = current
+                frontier.append((neighbor, heuristic[neighbor]))
+
+    print("\nGoal not found")
+
+print("\nGreedy Best First Search:")
+greedy_best_first_search(graph, 'A', 'I')
+
+
+ # ###################### A* GRAPH VERSION ############
+
+graph = {
+    'A': {'B': 4, 'C': 3},
+    'B': {'E': 12, 'F': 5},
+    'C': {'D': 7, 'E': 10},
+    'D': {'E': 2},
+    'E': {'G': 5},
+    'F': {'G': 16},
+    'G': {}
+}
+
+heuristic = {
+    'A': 14, 'B': 12, 'C': 11,
+    'D': 6, 'E': 4, 'F': 11, 'G': 0
+}
+
+def a_star(graph, start, goal):
+    frontier = [(start, heuristic[start])]
+    g_cost = {start: 0}
+    parent = {start: None}
+    visited = set()
+
+    while frontier:
+        frontier.sort(key=lambda x: x[1])
+        current, _ = frontier.pop(0)
+
+        if current in visited:
+            continue
+
+        print(current, end=" ")
+        visited.add(current)
+
+        if current == goal:
+            path = []
+            while current:
+                path.append(current)
+                current = parent[current]
+            print("\nPath:", path[::-1])
+            return
+
+        for neighbor, cost in graph[current].items():
+            new_g = g_cost[current] + cost
+            f = new_g + heuristic[neighbor]
+
+            if neighbor not in g_cost or new_g < g_cost[neighbor]:
+                g_cost[neighbor] = new_g
+                parent[neighbor] = current
+                frontier.append((neighbor, f))
+
+    print("\nGoal not found")
+
+print("\nA* Search:")
+a_star(graph, 'A', 'G')
+
+
+#---------------------------------
+# MAZE SOLVED USING GREEDY BFS
+
+from queue import PriorityQueue
+
+def heuristic(a, b):
+    return abs(a[0]-b[0]) + abs(a[1]-b[1])
+
+def greedy_maze(maze, start, goal):
+    pq = PriorityQueue()
+    pq.put((heuristic(start, goal), start))
+    parent = {start: None}
+    visited = set()
+
+    while not pq.empty():
+        _, current = pq.get()
+
+        if current in visited:
+            continue
+
+        visited.add(current)
+
+        if current == goal:
+            path = []
+            while current:
+                path.append(current)
+                current = parent[current]
+            return path[::-1]
+
+        for dx, dy in [(1,0),(-1,0),(0,1),(0,-1)]:
+            nx, ny = current[0]+dx, current[1]+dy
+            if 0 <= nx < len(maze) and 0 <= ny < len(maze[0]) and maze[nx][ny] == 0:
+                nxt = (nx, ny)
+                if nxt not in visited:
+                    parent[nxt] = current
+                    pq.put((heuristic(nxt, goal), nxt))
+
+    return None
+
+maze = [
+    [0,0,1,0,0],
+    [0,0,0,0,0],
+    [0,0,1,0,1],
+    [0,0,1,0,0],
+    [0,0,0,1,0]
+]
+
+print("Maze Path (Greedy):", greedy_maze(maze, (0,0), (4,4)))
+
+
+
+#----------------------------
+# MAZE SOLVED USING A*
+
+def a_star_maze(maze, start, goal):
+    pq = PriorityQueue()
+    pq.put((0, start))
+    g_cost = {start: 0}
+    parent = {start: None}
+
+    while not pq.empty():
+        _, current = pq.get()
+
+        if current == goal:
+            path = []
+            while current:
+                path.append(current)
+                current = parent[current]
+            return path[::-1]
+
+        for dx, dy in [(1,0),(-1,0),(0,1),(0,-1)]:
+            nx, ny = current[0]+dx, current[1]+dy
+            if 0 <= nx < len(maze) and 0 <= ny < len(maze[0]) and maze[nx][ny] == 0:
+                nxt = (nx, ny)
+                new_g = g_cost[current] + 1
+                if nxt not in g_cost or new_g < g_cost[nxt]:
+                    g_cost[nxt] = new_g
+                    f = new_g + heuristic(nxt, goal)
+                    parent[nxt] = current
+                    pq.put((f, nxt))
+
+    return None
+
+print("Maze Path (A*):", a_star_maze(maze, (0,0), (4,4)))
+
+
+
+# Beam Search
+import heapq
+def beam_search(graph, start, goal, beam_width=2):
+    beam = [(0, [start])]
+
+    while beam:
+        candidates = []
+        for cost, path in beam:
+            current_node = path[-1]
+            if current_node == goal:
+                return path, cost
+            for neighbor, edge_cost in graph.get(current_node, []):
+                new_cost = cost + edge_cost
+                new_path = path + [neighbor]
+                candidates.append((new_cost, new_path))
+
+        beam = heapq.nsmallest(beam_width, candidates, key=lambda x: x[0])
+
+    return None, float('inf')
+
+
+# Gen Algo
+import random
+def fitness(chromosome):
+    return sum(chromosome)
+
+def roulette_wheel_selection(population, fitness_values):
+    total_fitness = sum(fitness_values)
+    probabilities = [f / total_fitness for f in fitness_values]
+    selected = random.choices(population, probabilities, k=2)
+    return selected
+
+def crossover(parent1, parent2):
+    crossover_point = random.randint(1, len(parent1) - 1)
+    child1 = parent1[:crossover_point] + parent2[crossover_point:]
+    child2 = parent2[:crossover_point] + parent1[crossover_point:]
+    return child1, child2
+
+def mutate(chromosome, mutation_rate):
+    chromosome = chromosome[:]
+    for i in range(len(chromosome)):
+        if random.random() < mutation_rate:
+            chromosome[i] = 1 - chromosome[i]
+    return chromosome
+
+def genetic_algorithm(initial_population, generations, mutation_rate):
+    population = [chromo[:] for chromo in initial_population]
+    pop_size = len(population)
+
+    for generation in range(generations):
+        fitness_values = [fitness(chromo) for chromo in population]
+
+        best = max(population, key=fitness)
+
+        offspring = []
+        while len(offspring) < pop_size - 1:
+            parents = roulette_wheel_selection(population, fitness_values)
+            child1, child2 = crossover(parents[0], parents[1])
+            offspring.append(child1)
+            if len(offspring) < pop_size - 1:
+                offspring.append(child2)
+
+        mutated_offspring = [mutate(chromo, mutation_rate) for chromo in offspring]
+
+        population = [best] + mutated_offspring
+
+    best_chromosome = max(population, key=fitness)
+    return best_chromosome
+
+initial_population = [
+    [0, 1, 1, 0, 1],
+    [1, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0],
+    [1, 0, 0, 1, 1]
+]
+
+generations   = 50
+mutation_rate = 0.01
+
+best_solution = genetic_algorithm(initial_population, generations, mutation_rate)
+print("Best solution:", best_solution)
+print("Fitness:      ", fitness(best_solution))
+
+
+# N Queens using Gen Algo
+import random
+
+n = 8
+
+def calculate_fitness(individual):
+    non_attacking_pairs = 0
+    total_pairs = n * (n - 1) // 2
+    for i in range(n):
+        for j in range(i + 1, n):
+            if individual[i] != individual[j] and abs(individual[i] - individual[j]) != abs(i - j):
+                non_attacking_pairs += 1
+    return non_attacking_pairs / total_pairs
+
+def create_random_individual():
+    return random.sample(range(n), n)
+
+population_size = 10
+population = [create_random_individual() for _ in range(population_size)]
+fitness_scores = [calculate_fitness(individual) for individual in population]
+print("Fitness Scores:", fitness_scores)
+
+def select_parents(population, fitness_scores):
+    sorted_population = [board for _, board in sorted(zip(fitness_scores, population), reverse=True)]
+    return sorted_population[:len(population) // 2]
+
+parents = select_parents(population, fitness_scores)
+print("Selected Parents:", parents)
+
+def crossover(parent1, parent2):
+    point = random.randint(1, n - 2)
+    child = parent1[:point] + parent2[point:]
+    missing = set(range(n)) - set(child)
+    for i in range(len(child)):
+        if child.count(child[i]) > 1:
+            child[i] = missing.pop()
+    return child
+
+new_population = []
+for i in range(population_size):
+    parent1, parent2 = random.sample(parents, 2)
+    child = crossover(parent1, parent2)
+    new_population.append(child)
+print("New Population after Crossover:", new_population)
+
+def mutate(individual):
+    idx1, idx2 = random.sample(range(n), 2)
+    individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
+    return individual
+
+mutation_rate = 0.1
+for i in range(len(new_population)):
+    if random.random() < mutation_rate:
+        new_population[i] = mutate(new_population[i])
+print("Population after Mutation:", new_population)
+
+def genetic_algorithm():
+    population = [create_random_individual() for _ in range(population_size)]
+    generation = 0
+    best_fitness = 0
+
+    while best_fitness < 1.0 and generation < 100:
+        fitness_scores = [calculate_fitness(ind) for ind in population]
+        best_fitness = max(fitness_scores)
+        print(f"Generation {generation} Best Fitness: {best_fitness}")
+
+        if best_fitness == 1.0:
+            break
+
+        parents = select_parents(population, fitness_scores)
+        new_population = [crossover(random.choice(parents), random.choice(parents)) for _ in range(population_size)]
+
+        for i in range(len(new_population)):
+            if random.random() < mutation_rate:
+                new_population[i] = mutate(new_population[i])
+
+        population = new_population
+        generation += 1
+
+    best_individual = max(population, key=calculate_fitness)
+    return best_individual, calculate_fitness(best_individual)
+
+solution, fitness = genetic_algorithm()
+print("Best Solution:", solution)
+print("Best Fitness:", fitness)
+
+
+# Hill Climbin N Queens
+import random
+def calculate_conflicts(state):
+    print(state)
+    conflicts = 0
+    n = len(state)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if state[i] == state[j] or abs(state[i] - state[j]) == abs(i - j):
+                conflicts += 1
+    return conflicts
+
+def get_neighbors(state):
+    neighbors = []
+    n = len(state)
+    for row in range(n):
+        for col in range(n):
+            if col != state[row]:
+                new_state = list(state)
+                new_state[row] = col
+                neighbors.append(new_state)
+    return neighbors
+
+
+def simple_hill_climbing(n):
+    current_state = [random.randint(0, n - 1) for _ in range(n)]
+    current_conflicts = calculate_conflicts(current_state)
+   
+    while True:
+        neighbors = get_neighbors(current_state)
+        next_state = None
+        next_conflicts = current_conflicts
+        for neighbor in neighbors:
+            neighbor_conflicts = calculate_conflicts(neighbor)
+            if neighbor_conflicts < next_conflicts:
+                next_state = neighbor
+                next_conflicts = neighbor_conflicts
+                break
+       
+        if next_conflicts >= current_conflicts:
+            break
+       
+        current_state = next_state
+        current_conflicts = next_conflicts
+   
+    return current_state, current_conflicts
+
+n = 8
+solution, conflicts = simple_hill_climbing(4)
+if conflicts == 0:
+    print(f"Solution found for {n}-Queens problem:")
+    print(solution)
+else:
+    print(f"Could not find a solution. Stuck at state with {conflicts} conflicts:")
+    print(solution)
+
+
+# Hill Climbing eq LT
+import random
+
+def f(x):
+    return -(x*x) + (6*x)
+
+
+def hill_climbing():
+    min_x = 0
+    max_x = 6
+    
+    curr_x = random.randint(min_x, max_x)
+    print(f"Initial value of x: {curr_x}")
+    
+    step = 1
+    while True:
+        curr_f = f(curr_x)
+        print(f"Step {step} -> Current value of x: {curr_x} | f(x): {curr_f}")
+        
+        neighbors = []
+        if curr_x + 1 <= max_x:
+            neighbors.append(curr_x + 1)
+        if curr_x - 1 >= min_x:
+            neighbors.append(curr_x - 1)
+            
+        best_neighbor = None
+        best_neighbor_f = curr_f
+        
+        for neighbor in neighbors:
+            neighbor_f = f(neighbor)
+            if neighbor_f > best_neighbor_f:
+                best_neighbor = neighbor
+                best_neighbor_f = neighbor_f
+                
+        if best_neighbor is None:
+            print("\n--------------------------------------")
+            print(f"Final optimal value of x: {curr_x}")
+            print(f"Maximum f(x): {curr_f}")
+            break
+            
+        curr_x = best_neighbor
+        step += 1
+
+
+def main():
+    hill_climbing()
+
+
+main()
+
+
+# Beam Search LT
+import heapq
+
+def heuristic(x):
+    return abs(20 - x)
+
+
+def beam_search(start, goal, width = 2):
+    beam = [(heuristic(start), [start])]
+    level = 0
+
+    while beam:
+        print(f"Level {level}")
+        candidates = []
+
+        for h, path in beam:
+            x = path[-1]
+            print(f"Number explored: {x}")
+
+            if x == goal:
+                print("\nGoal has been reached!")
+                return path
+
+            for neighbour in [x + 2, x + 3, x * 2]:
+                new_path = path + [neighbour]
+                candidates.append((heuristic(neighbour), new_path))
+
+        beam = heapq.nsmallest(width, candidates, key=lambda x: x[0])
+
+        print("Beam states:")
+        for h, p in beam:
+            print(f"{p[-1]} heuristic: {h}")
+
+        print("-----------------------------\n")
+        level += 1
+
+
+def main():
+    result = beam_search(1, 20)
+    print("Final path:", result)
+
+
+main()
+
+# Gen Algo LT
+import random
+
+POPULATION_SIZE = 6
+GENERATIONS = 15
+MUTATION_RATE = 0.1
+
+def fitness(x):
+    return x**2 + 2*x
+
+
+def binary_to_decimal(binary):
+    return int(binary, 2)
+
+
+def create_chromosome():
+    return format(random.randint(0, 31), '05b')
+
+
+def initialize_population():
+    return [create_chromosome() for _ in range(POPULATION_SIZE)]
+
+
+def selection(population):
+    population = sorted(
+        population,
+        key=lambda c: fitness(binary_to_decimal(c)),
+        reverse=True
+    )
+    return population[0], population[1]
+
+
+def crossover(parent1, parent2):
+    point = random.randint(1, 4)
+    child1 = parent1[:point] + parent2[point:]
+    child2 = parent2[:point] + parent1[point:]
+
+    return child1, child2
+
+
+def mutation(chromosome):
+    if random.random() < MUTATION_RATE:
+        pos = random.randint(0, 4)
+        chrom_list = list(chromosome)
+        chrom_list[pos] = '1' if chrom_list[pos] == '0' else '0'
+        chromosome = "".join(chrom_list)
+
+    return chromosome
+
+
+def genetic_algorithm():
+    population = initialize_population()
+
+    for gen in range(GENERATIONS):
+        parent1, parent2 = selection(population)
+        child1, child2 = crossover(parent1, parent2)
+        child1 = mutation(child1)
+        child2 = mutation(child2)
+        population[-1] = child1
+        population[-2] = child2
+
+    best = max(population, key=lambda c: fitness(binary_to_decimal(c)))
+    return best
+
+
+def main():
+    best_chromosome = genetic_algorithm()
+    best_x = binary_to_decimal(best_chromosome)
+
+    print(f"Best Chromosome: {best_chromosome}")
+    print(f"Best value of x: {best_x}")
+    print(f"Best Fitness: {fitness(best_x)}")
+
+
+main()
+
+
+# ####################Abdullah shaikh solved paper: ################################
+
+# ##############################################################
+# QUESTION 01 - Hospital Medical Drone (BFS + Utility Agent)
+# LLO #01: BFS & DFS | Marks: 14 | Time: 25 minutes
+# ##############################################################
+
+from collections import deque
+
+hospital = {
+    "WardA": {"status": "Critical", "adjacent": ["WardB", "WardC"]},
+    "WardB": {"status": "Normal",   "adjacent": ["WardA", "WardD"]},
+    "WardC": {"status": "Critical", "adjacent": ["WardA", "WardD"]},
+    "WardD": {"status": "Empty",    "adjacent": ["WardB", "WardC"]},
+}
+
+# ---- TASK 1: UtilityBasedAgent class [03 Marks] ----
+class UtilityBasedAgent:
+    def __init__(self, hospital, start_ward):
+        self.hospital = hospital
+        self.current_ward = start_ward
+        self.moves = 0
+        self.critical_patients_treated = 0
+        self.environment_state = {ward: hospital[ward]["status"] for ward in hospital}
+
+    def utility(self):
+        """Utility function: (10 × critical patients treated) - moves"""
+        return (10 * self.critical_patients_treated) - self.moves
+
+    # ---- TASK 2: BFS to nearest critical ward [07 Marks] ----
+    def bfs_nearest_critical(self, start):
+        visited = set()
+        queue = deque()
+        queue.append((start, [start]))
+        visited.add(start)
+
+        while queue:
+            current, path = queue.popleft()
+            if current != start and self.environment_state[current] == "Critical":
+                return path
+            for neighbor in self.hospital[current]["adjacent"]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append((neighbor, path + [neighbor]))
+        return None
+
+    # ---- TASK 3: Agent actions [02 Marks] ----
+    def act(self):
+        if self.environment_state[self.current_ward] == "Critical":
+            print(f"  [ACTION] Delivering medicine to {self.current_ward}")
+            self.environment_state[self.current_ward] = "Treated"
+            self.critical_patients_treated += 1
+        else:
+            path = self.bfs_nearest_critical(self.current_ward)
+            if path and len(path) > 1:
+                next_ward = path[1]
+                print(f"  [ACTION] Moving from {self.current_ward} → {next_ward} | BFS path: {path}")
+                self.current_ward = next_ward
+                self.moves += 1
+            else:
+                print(f"  [ACTION] No critical patients reachable.")
+
+    # ---- TASK 4: Full simulation [02 Marks] ----
+    def run_simulation(self):
+        print("=" * 60)
+        print("   Q1: HOSPITAL DRONE SIMULATION")
+        print("=" * 60)
+        step = 0
+        while True:
+            if not any(s == "Critical" for s in self.environment_state.values()):
+                print("\n✅ All critical patients treated!")
+                break
+            step += 1
+            print(f"\n--- Step {step} ---")
+            print(f"  Ward: {self.current_ward} | Status: {self.environment_state[self.current_ward]}")
+            self.act()
+            print(f"  State   : {self.environment_state}")
+            print(f"  Utility : {self.utility()}")
+            if step > 20:
+                break
+        print(f"\nFINAL UTILITY: {self.utility()} | Treated: {self.critical_patients_treated} | Moves: {self.moves}")
+
+agent = UtilityBasedAgent(hospital, "WardA")
+agent.run_simulation()
+
+
+# ##############################################################
+# QUESTION 02 - Rescue Drone A* on Grid
+# LLO #02: A* & GBFS | Marks: 18 | Time: 35 minutes
+# ##############################################################
+
+import heapq
+
+grid = [
+    ['S', '.', '.', 'W', '.'],
+    ['.', '#', '.', '.', '.'],
+    ['.', '#', '.', '#', '.'],
+    ['.', '.', 'F', '#', '.'],
+    ['.', '.', '.', '.', 'G'],
+]
+ROWS, COLS = 5, 5
+
+def terrain_cost(cell):
+    if cell == '#': return float('inf')
+    if cell == 'W': return 3
+    if cell == 'F': return 5
+    return 1
+
+def heuristic(pos, goal):
+    return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
+
+def find_pos(grid, ch):
+    for r in range(ROWS):
+        for c in range(COLS):
+            if grid[r][c] == ch:
+                return (r, c)
+
+# ---- TASK 1: Problem Model [05 Marks] ----
+start = find_pos(grid, 'S')
+goal  = find_pos(grid, 'G')
+print("\n" + "=" * 60)
+print("   Q2: RESCUE DRONE - A* SEARCH")
+print("=" * 60)
+print(f"State Space : All (row, col) positions in 5×5 grid")
+print(f"Initial     : {start}  |  Goal: {goal}")
+print(f"Actions     : Up, Down, Left, Right")
+print(f"Costs       : '.'=1, 'W'=3, 'F'=5, '#'=blocked")
+
+# ---- TASK 2 & 3: A* Search [09 Marks] + Path Output [04 Marks] ----
+def a_star(grid, start, goal):
+    open_list = [(heuristic(start, goal), 0, start, [start])]
+    visited = {}
+    print(f"\n{'Step':<5} {'Node':<12} {'g(n)':<6} {'h(n)':<6} {'f(n)':<6}")
+    print("-" * 40)
+    step = 0
+    while open_list:
+        f, g, cur, path = heapq.heappop(open_list)
+        if cur in visited and visited[cur] <= g:
+            continue
+        visited[cur] = g
+        step += 1
+        print(f"{step:<5} {str(cur):<12} {g:<6} {heuristic(cur,goal):<6} {f:<6}")
+        if cur == goal:
+            return path, g
+        r, c = cur
+        for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:
+            nr, nc = r+dr, c+dc
+            if 0 <= nr < ROWS and 0 <= nc < COLS:
+                cost = terrain_cost(grid[nr][nc])
+                if cost == float('inf'): continue
+                ng = g + cost
+                nb = (nr, nc)
+                if nb not in visited or visited[nb] > ng:
+                    heapq.heappush(open_list, (ng + heuristic(nb, goal), ng, nb, path+[nb]))
+    return None, float('inf')
+
+path, cost = a_star(grid, start, goal)
+print(f"\nOptimal Path : {path}")
+print(f"Total Cost   : {cost}")
+path_set = set(path)
+print("\nGrid with path (*):")
+for r in range(ROWS):
+    print("  " + "  ".join("*" if (r,c) in path_set and grid[r][c] not in "SG" else grid[r][c] for c in range(COLS)))
+
+
+# ##############################################################
+# QUESTION 03 - Genetic Algorithm for TSP
+# LLO #04: Genetic Algorithms | Marks: 18 | Time: 40 minutes
+# ##############################################################
+
+import math, random
+random.seed(42)
+
+cities = {0:(2,3), 1:(5,7), 2:(1,9), 3:(8,2), 4:(4,5)}
+N = len(cities)
+
+# ---- TASK 1: Total Distance Calculation [02 Marks] ----
+def euclidean(c1, c2):
+    return math.sqrt((c1[0]-c2[0])**2 + (c1[1]-c2[1])**2)
+
+def total_distance(route):
+    return sum(euclidean(cities[route[i]], cities[route[(i+1)%len(route)]]) for i in range(len(route)))
+
+# ---- TASK 2: Tournament Selection [03 Marks] ----
+def tournament_selection(population, k=3):
+    tournament = random.sample(population, k)
+    return min(tournament, key=total_distance)
+
+# ---- TASK 3: Order Crossover OX [04 Marks] ----
+def order_crossover(p1, p2):
+    size = len(p1)
+    s, e = sorted(random.sample(range(size), 2))
+    child = [None] * size
+    child[s:e+1] = p1[s:e+1]
+    remaining = [c for c in p2 if c not in child]
+    idx = 0
+    for i in range(size):
+        if child[i] is None:
+            child[i] = remaining[idx]; idx += 1
+    return child
+
+# ---- TASK 4: Mutation - swap two cities [03 Marks] ----
+def mutate(route, rate=0.2):
+    route = route[:]
+    if random.random() < rate:
+        i, j = random.sample(range(len(route)), 2)
+        route[i], route[j] = route[j], route[i]
+    return route
+
+# ---- TASK 5: GA Main Loop with stopping condition [06 Marks] ----
+def genetic_algorithm(cities, pop_size=50, generations=200, desired=24.0):
+    keys = list(cities.keys())
+    population = [random.sample(keys, len(keys)) for _ in range(pop_size)]
+    best_route, best_dist = None, float('inf')
+
+    print("\n" + "=" * 60)
+    print("   Q3: GENETIC ALGORITHM - TSP")
+    print("=" * 60)
+
+    for gen in range(generations):
+        new_pop = []
+        for _ in range(pop_size):
+            p1 = tournament_selection(population)
+            p2 = tournament_selection(population)
+            child = mutate(order_crossover(p1, p2))
+            new_pop.append(child)
+        population = new_pop
+        gen_best = min(population, key=total_distance)
+        gen_dist = total_distance(gen_best)
+        if gen_dist < best_dist:
+            best_dist = gen_dist; best_route = gen_best[:]
+        if gen % 50 == 0 or gen == generations-1:
+            print(f"  Gen {gen+1:>3}: Best = {best_dist:.2f} | Route = {best_route}")
+        if best_dist <= desired:
+            print(f"\n🎯 Goal distance {desired} reached at generation {gen+1}!")
+            break
+
+    return best_route, best_dist
+
+best_route, best_dist = genetic_algorithm(cities)
+print(f"\nBest Route    : {best_route}")
+print(f"Total Distance: {best_dist:.2f} units")
+print("\nStep-by-step:")
+for i in range(len(best_route)):
+    a, b = best_route[i], best_route[(i+1)%len(best_route)]
+    print(f"  City {a} {cities[a]} → City {b} {cities[b]} : {euclidean(cities[a],cities[b]):.2f}")
+print(f"  {'TOTAL':<40}: {best_dist:.2f}")1
