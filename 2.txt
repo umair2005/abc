@@ -1,0 +1,966 @@
+
+#SVM
+from sklearn import datasets
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# Load dataset
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+
+# Convert to binary classification (class 0 vs others)
+y = (y == 0).astype(int)
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Train SVM model with RBF kernel
+svm = SVC(kernel='rbf', C=1, gamma='scale')
+svm.fit(X_train, y_train)
+
+# Make predictions
+y_pred = svm.predict(X_test)
+
+# Evaluate the model
+print("SVM Accuracy:", accuracy_score(y_test, y_pred))
+
+
+
+#Linear regression
+
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+
+# Example dataset
+# X = features, y = target
+X = np.array([[1], [2], [3], [4], [5]])
+y = np.array([2, 4, 6, 8, 10])  # y = 2x
+
+# Split the data
+x_train, x_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train the model
+LR = LinearRegression()
+ModelLR = LR.fit(x_train, y_train)
+
+# Make predictions
+PredictionLR = ModelLR.predict(x_test)
+
+# Print predictions
+print("Predictions:", PredictionLR)
+
+# Evaluate model
+mse = mean_squared_error(y_test, PredictionLR)
+print("Mean Squared Error:", mse)
+
+
+#linear regression v2
+
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Dataset
+X = np.array([[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]])
+y = np.array([2, 4, 6, 8, 10, 12, 14, 16, 18, 20])
+
+# Split data
+x_train, x_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train model
+LR = LinearRegression()
+ModelLR = LR.fit(x_train, y_train)
+
+# Predict
+PredictionLR = ModelLR.predict(x_test)
+
+print("Predictions:", PredictionLR)
+
+# Evaluation
+mse = mean_squared_error(y_test, PredictionLR)
+print("Mean Squared Error:", mse)
+
+print("===================LR Testing Accuracy================")
+testingAccLR = r2_score(y_test, PredictionLR) * 100
+print(testingAccLR)
+
+print("Equation: y =", ModelLR.coef_[0], "x +", ModelLR.intercept_)
+
+
+#Decision tree
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+
+# Example dataset
+X = np.array([[1],[2],[3],[4],[5]])
+y = np.array([0,0,1,1,1])   # class labels
+
+# Split data
+x_train, x_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.4, random_state=42
+)
+
+# Decision Tree
+DT = DecisionTreeClassifier()
+
+# Train model
+ModelDT = DT.fit(x_train, y_train)
+
+# Predictions
+PredictionDT = DT.predict(x_test)
+print("Predictions:", PredictionDT)
+
+# Training Accuracy
+print("====================DT Training Accuracy================")
+tracDT = DT.score(x_train, y_train)
+print(f"Training Accuracy: {tracDT*100:.2f}%")
+
+# Testing Accuracy
+print("====================DT Testing Accuracy================")
+teacDT = accuracy_score(y_test, PredictionDT)
+print(f"Testing Accuracy: {teacDT*100:.2f}%")
+
+#lab10 task1 :
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Sample dataset
+data = {
+'Bedrooms':[3,4,2,5,3],
+'Sqft':[1500,2500,1200,3000,1800],
+'Bathrooms':[2,3,1,4,2],
+'Age':[10,5,20,2,8],
+'Neighborhood':['A','B','A','C','B'],
+'Price':[300000,500000,220000,650000,350000]
+}
+
+df = pd.DataFrame(data)
+
+# Encode categorical variable
+le = LabelEncoder()
+df['Neighborhood'] = le.fit_transform(df['Neighborhood'])
+
+# Features and target
+X = df[['Bedrooms','Sqft','Bathrooms','Age','Neighborhood']]
+y = df['Price']
+
+# Split data
+x_train,x_test,y_train,y_test = train_test_split(
+X,y,test_size=0.2,random_state=42
+)
+
+# Train model
+LR = LinearRegression()
+LR.fit(x_train,y_train)
+
+# Prediction
+pred = LR.predict(x_test)
+
+print("Predicted Prices:",pred)
+
+# Evaluation
+mse = mean_squared_error(y_test,pred)
+r2 = r2_score(y_test,pred)
+
+print("MSE:",mse)
+print("R2 Score:",r2)
+
+# New house prediction
+new_house=[[4,2200,3,6,1]]
+price=LR.predict(new_house)
+
+print("Predicted New House Price:",price)
+
+#lab10 task2
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Dataset
+data = {
+'Word_Freq':[15,2,18,1,20,3,17,4],
+'Email_Length':[300,120,400,100,500,150,350,180],
+'Hyperlinks':[1,0,1,0,1,0,1,0],
+'Spam':[1,0,1,0,1,0,1,0]
+}
+
+df = pd.DataFrame(data)
+
+# Features and target
+X = df[['Word_Freq','Email_Length','Hyperlinks']]
+y = df['Spam']
+
+# Split dataset
+x_train, x_test, y_train, y_test = train_test_split(
+X, y, test_size=0.25, random_state=42
+)
+
+# Train model
+DT = DecisionTreeClassifier()
+DT.fit(x_train, y_train)
+
+# Predictions
+PredictionDT = DT.predict(x_test)
+
+print("Predictions:", PredictionDT)
+
+# Evaluate model
+print("================ Testing Accuracy ================")
+acc = accuracy_score(y_test, PredictionDT)
+print(f"Accuracy: {acc*100:.2f}%")
+
+print("\nClassification Report")
+print(classification_report(y_test, PredictionDT))
+
+# Classify new incoming email
+new_email = pd.DataFrame({
+'Word_Freq':[17],
+'Email_Length':[350],
+'Hyperlinks':[1]
+})
+
+prediction = DT.predict(new_email)
+
+if prediction[0] == 1:
+    print("New Email Classification: Spam")
+else:
+    print("New Email Classification: Not Spam")
+
+#lab10 task3
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+
+# Dataset
+data = {
+'Spending':[5000,1000,7000,800,6500],
+'Age':[35,22,40,25,38],
+'Visits':[20,5,25,3,22],
+'Frequency':[15,2,18,1,16],
+'Value':[1,0,1,0,1]
+}
+
+df = pd.DataFrame(data)
+
+# Features & target
+X = df[['Spending','Age','Visits','Frequency']]
+y = df['Value']
+
+# Scaling
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Split data
+x_train, x_test, y_train, y_test = train_test_split(
+X, y, test_size=0.2, random_state=42
+)
+
+# Model (SVM = separating hyperplane)
+svm = SVC(kernel='linear')
+svm.fit(x_train, y_train)
+
+# Prediction
+pred = svm.predict(x_test)
+
+print("Predictions:", pred)
+
+# Accuracy
+acc = accuracy_score(y_test, pred)
+print("Testing Accuracy:", acc * 100)
+
+# New customer prediction
+new_customer = scaler.transform([[6000, 36, 18, 14]])
+print("Customer Class:", svm.predict(new_customer))
+
+
+#Bayesian
+from pgmpy.models import BayesianNetwork
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.inference import VariableElimination
+
+# Step 1: Structure
+model = BayesianNetwork([
+('Burglary', 'Alarm'),
+('Earthquake', 'Alarm'),
+('Alarm', 'JohnCalls'),
+('Alarm', 'MaryCalls')
+])
+
+# Step 2: CPDs
+cpd_burglary = TabularCPD(
+variable='Burglary',
+variable_card=2,
+values=[[0.999], [0.001]]
+)
+
+cpd_earthquake = TabularCPD(
+variable='Earthquake',
+variable_card=2,
+values=[[0.998], [0.002]]
+)
+
+cpd_alarm = TabularCPD(
+variable='Alarm',
+variable_card=2,
+values=[
+[0.999, 0.71, 0.06, 0.05],
+[0.001, 0.29, 0.94, 0.95]
+],
+evidence=['Burglary', 'Earthquake'],
+evidence_card=[2, 2]
+)
+
+cpd_john = TabularCPD(
+variable='JohnCalls',
+variable_card=2,
+values=[
+[0.3, 0.9],
+[0.7, 0.1]
+],
+evidence=['Alarm'],
+evidence_card=[2]
+)
+
+cpd_mary = TabularCPD(
+variable='MaryCalls',
+variable_card=2,
+values=[
+[0.2, 0.99],
+[0.8, 0.01]
+],
+evidence=['Alarm'],
+evidence_card=[2]
+)
+
+# Step 3: Add CPDs
+model.add_cpds(cpd_burglary, cpd_earthquake, cpd_alarm, cpd_john, cpd_mary)
+
+# Step 4: Validate model
+model.check_model()
+
+# Step 5: Inference
+inference = VariableElimination(model)
+
+result = inference.query(
+variables=['Burglary'],
+evidence={'JohnCalls': 1, 'MaryCalls': 1}
+)
+
+print(result)
+
+#markov
+import numpy as np
+
+# States
+states = ["Red", "Blue"]
+
+# Transition matrix
+transition_matrix = np.array([
+[0.5, 0.5],  # Red -> Red / Blue
+[0.5, 0.5]   # Blue -> Red / Blue
+])
+
+# Markov simulation function
+def simulate_markov_process(initial_state, num_steps):
+    current_state = initial_state
+    state_sequence = [current_state]
+
+    for _ in range(num_steps):
+        if current_state == "Red":
+            next_state = np.random.choice(states, p=transition_matrix[0])
+        else:
+            next_state = np.random.choice(states, p=transition_matrix[1])
+
+        state_sequence.append(next_state)
+        current_state = next_state
+
+    return state_sequence
+
+# Run simulation
+initial_state = "Red"
+num_steps = 10
+
+state_sequence = simulate_markov_process(initial_state, num_steps)
+
+print(f"State sequence for {num_steps} steps starting from {initial_state}:")
+print(" -> ".join(state_sequence))
+
+#lab9 task2:
+from pgmpy.models import BayesianNetwork
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.inference import VariableElimination
+
+# Structure
+model = BayesianNetwork([
+('I','G'),
+('S','G'),
+('D','G'),
+('G','P')
+])
+
+# Priors
+cpd_I = TabularCPD('I', 2, [[0.7],[0.3]])
+cpd_S = TabularCPD('S', 2, [[0.6],[0.4]])
+cpd_D = TabularCPD('D', 2, [[0.6],[0.4]])
+
+# Grade CPT (example assumption)
+cpd_G = TabularCPD(
+'G', 3,
+[
+[0.8,0.6,0.7,0.4,0.5,0.3,0.2,0.1],
+[0.15,0.3,0.2,0.4,0.3,0.4,0.5,0.6],
+[0.05,0.1,0.1,0.2,0.2,0.3,0.3,0.3]
+],
+evidence=['I','S','D'],
+evidence_card=[2,2,2]
+)
+
+# Pass CPT
+cpd_P = TabularCPD(
+'P',2,
+[
+[0.05,0.2,0.5],
+[0.95,0.8,0.5]
+],
+evidence=['G'],
+evidence_card=[3]
+)
+
+model.add_cpds(cpd_I,cpd_S,cpd_D,cpd_G,cpd_P)
+model.check_model()
+
+infer = VariableElimination(model)
+
+q1 = infer.query(
+variables=['P'],
+evidence={'S':0,'D':1}
+)
+print(q1)
+
+#min max
+import math
+
+class Node:
+    def __init__(self, value=None):
+        self.value = value
+        self.children = []
+        self.minmax_value = None
+
+
+class MinimaxAgent:
+    def __init__(self, depth):
+        self.depth = depth
+
+    def formulate_goal(self, node):
+        return "Goal reached" if node.minmax_value is not None else "Searching"
+
+    def act(self, node, environment):
+        goal_status = self.formulate_goal(node)
+        if goal_status == "Goal reached":
+            return f"Minimax value for root node: {node.minmax_value}"
+        else:
+            return environment.compute_minimax(node, self.depth)
+
+
+class Environment:
+    def __init__(self, tree):
+        self.tree = tree
+        self.computed_nodes = []
+
+    def get_percept(self, node):
+        return node
+
+    def compute_minimax(self, node, depth, maximizing_player=True):
+
+        if depth == 0 or not node.children:
+            self.computed_nodes.append(node.value)
+            return node.value
+
+        if maximizing_player:
+            value = -math.inf
+            for child in node.children:
+                child_value = self.compute_minimax(child, depth - 1, False)
+                value = max(value, child_value)
+
+            node.minmax_value = value
+            self.computed_nodes.append(node.value)
+            return value
+
+        else:
+            value = math.inf
+            for child in node.children:
+                child_value = self.compute_minimax(child, depth - 1, True)
+                value = min(value, child_value)
+
+            node.minmax_value = value
+            self.computed_nodes.append(node.value)
+            return value
+
+
+def run_agent(agent, environment, start_node):
+    percept = environment.get_percept(start_node)
+    agent.act(percept, environment)
+
+
+# ---------------- TREE ----------------
+
+root = Node('A')
+
+n1 = Node('B')
+n2 = Node('C')
+root.children = [n1, n2]
+
+n3 = Node('D')
+n4 = Node('E')
+n5 = Node('F')
+n6 = Node('G')
+
+n1.children = [n3, n4]
+n2.children = [n5, n6]
+
+n7 = Node(2)
+n8 = Node(3)
+n9 = Node(5)
+n10 = Node(9)
+
+n3.children = [n7, n8]
+n4.children = [n9, n10]
+
+n11 = Node(0)
+n12 = Node(1)
+n13 = Node(7)
+n14 = Node(5)
+
+n5.children = [n11, n12]
+n6.children = [n13, n14]
+
+# ---------------- RUN ----------------
+
+depth = 3
+agent = MinimaxAgent(depth)
+environment = Environment(root)
+
+run_agent(agent, environment, root)
+
+print("Computed Nodes:", environment.computed_nodes)
+
+print("\nMinimax values:")
+print("A:", root.minmax_value)
+print("B:", n1.minmax_value)
+print("C:", n2.minmax_value)
+print("D:", n3.minmax_value)
+print("E:", n4.minmax_value)
+print("F:", n5.minmax_value)
+print("G:", n6.minmax_value)
+
+#alpha beta
+import math
+
+class Node:
+    def __init__(self, value=None):
+        self.value = value
+        self.children = []
+        self.minmax_value = None
+
+
+class MinimaxAgent:
+    def __init__(self, depth):
+        self.depth = depth
+
+    def formulate_goal(self, node):
+        return "Goal reached" if node.minmax_value is not None else "Searching"
+
+    def act(self, node, environment):
+        goal_status = self.formulate_goal(node)
+        if goal_status == "Goal reached":
+            return f"Minimax value for root node: {node.minmax_value}"
+        else:
+            return environment.alpha_beta_search(
+                node, self.depth, -math.inf, math.inf, True
+            )
+
+
+class Environment:
+    def __init__(self, tree):
+        self.tree = tree
+        self.computed_nodes = []
+
+    def get_percept(self, node):
+        return node
+
+    def alpha_beta_search(self, node, depth, alpha, beta, maximizing_player=True):
+
+        self.computed_nodes.append(node.value)
+
+        if depth == 0 or not node.children:
+            return node.value
+
+        if maximizing_player:
+            value = -math.inf
+
+            for child in node.children:
+                value = max(
+                    value,
+                    self.alpha_beta_search(child, depth - 1, alpha, beta, False)
+                )
+
+                alpha = max(alpha, value)
+
+                if beta <= alpha:
+                    print("Pruned node:", child.value)
+                    break
+
+            node.minmax_value = value
+            return value
+
+        else:
+            value = math.inf
+
+            for child in node.children:
+                value = min(
+                    value,
+                    self.alpha_beta_search(child, depth - 1, alpha, beta, True)
+                )
+
+                beta = min(beta, value)
+
+                if beta <= alpha:
+                    print("Pruned node:", child.value)
+                    break
+
+            node.minmax_value = value
+            return value
+
+
+def run_agent(agent, environment, start_node):
+    percept = environment.get_percept(start_node)
+    agent.act(percept, environment)
+
+
+# ---------------- TREE ----------------
+
+root = Node('A')
+
+n1 = Node('B')
+n2 = Node('C')
+root.children = [n1, n2]
+
+n3 = Node('D')
+n4 = Node('E')
+n5 = Node('F')
+n6 = Node('G')
+
+n1.children = [n3, n4]
+n2.children = [n5, n6]
+
+n7 = Node(2)
+n8 = Node(3)
+n9 = Node(5)
+n10 = Node(9)
+
+n3.children = [n7, n8]
+n4.children = [n9, n10]
+
+n11 = Node(0)
+n12 = Node(1)
+n13 = Node(7)
+n14 = Node(5)
+
+n5.children = [n11, n12]
+n6.children = [n13, n14]
+
+# ---------------- RUN ----------------
+
+depth = 3
+agent = MinimaxAgent(depth)
+environment = Environment(root)
+
+run_agent(agent, environment, root)
+
+print("Computed Nodes:", environment.computed_nodes)
+
+print("\nMinimax values:")
+print("A:", root.minmax_value)
+print("B:", n1.minmax_value)
+print("C:", n2.minmax_value)
+print("D:", n3.minmax_value)
+print("E:", n4.minmax_value)
+print("F:", n5.minmax_value)
+print("G:", n6.minmax_value)
+
+#csp
+
+#basic csp
+from ortools.sat.python import cp_model
+
+model = cp_model.CpModel()
+
+num_vals = 3
+x = model.NewIntVar(0, num_vals - 1, "x")
+y = model.NewIntVar(0, num_vals - 1, "y")
+z = model.NewIntVar(0, num_vals - 1, "z")
+
+model.Add(x != y)
+
+solver = cp_model.CpSolver()
+status = solver.Solve(model)
+
+if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+    print(f"x = {solver.Value(x)}")
+    print(f"y = {solver.Value(y)}")
+    print(f"z = {solver.Value(z)}")
+else:
+    print("No solution found.")
+
+#simple csp
+
+from ortools.sat.python import cp_model
+
+def simple_sat_program():
+    model = cp_model.CpModel()
+
+    num_vals = 3
+    x = model.NewIntVar(0, num_vals - 1, "x")
+    y = model.NewIntVar(0, num_vals - 1, "y")
+    z = model.NewIntVar(0, num_vals - 1, "z")
+
+    model.Add(x != y)
+
+    solver = cp_model.CpSolver()
+    status = solver.Solve(model)
+
+    if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+        print(f"x = {solver.Value(x)}")
+        print(f"y = {solver.Value(y)}")
+        print(f"z = {solver.Value(z)}")
+    else:
+        print("No solution found.")
+
+simple_sat_program()
+
+
+#all solution printer csp
+
+
+from ortools.sat.python import cp_model
+
+class VarArraySolutionPrinter(cp_model.CpSolverSolutionCallback):
+    def __init__(self, variables):
+        cp_model.CpSolverSolutionCallback.__init__(self)
+        self.__variables = variables
+        self.__solution_count = 0
+
+    def on_solution_callback(self):
+        self.__solution_count += 1
+        for v in self.__variables:
+            print(f"{v}={self.Value(v)}", end=" ")
+        print()
+
+    @property
+    def solution_count(self):
+        return self.__solution_count
+
+
+model = cp_model.CpModel()
+
+num_vals = 3
+x = model.NewIntVar(0, num_vals - 1, "x")
+y = model.NewIntVar(0, num_vals - 1, "y")
+z = model.NewIntVar(0, num_vals - 1, "z")
+
+model.Add(x != y)
+
+solver = cp_model.CpSolver()
+solver.parameters.enumerate_all_solutions = True
+
+printer = VarArraySolutionPrinter([x, y, z])
+solver.Solve(model, printer)
+
+
+#optimisation csp
+
+
+from ortools.sat.python import cp_model
+
+model = cp_model.CpModel()
+
+x = model.NewIntVar(0, 50, "x")
+y = model.NewIntVar(0, 50, "y")
+z = model.NewIntVar(0, 50, "z")
+
+model.Add(2 * x + 7 * y + 3 * z <= 50)
+model.Add(3 * x - 5 * y + 7 * z <= 45)
+model.Add(5 * x + 2 * y - 6 * z <= 37)
+
+model.Maximize(2 * x + 2 * y + 3 * z)
+
+solver = cp_model.CpSolver()
+status = solver.Solve(model)
+
+if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+    print("Objective:", solver.ObjectiveValue())
+    print("x =", solver.Value(x))
+    print("y =", solver.Value(y))
+    print("z =", solver.Value(z))
+
+
+
+#n-queen csp
+
+
+from ortools.sat.python import cp_model
+
+model = cp_model.CpModel()
+
+x = model.NewIntVar(0, 50, "x")
+y = model.NewIntVar(0, 50, "y")
+z = model.NewIntVar(0, 50, "z")
+
+model.Add(2 * x + 7 * y + 3 * z <= 50)
+model.Add(3 * x - 5 * y + 7 * z <= 45)
+model.Add(5 * x + 2 * y - 6 * z <= 37)
+
+model.Maximize(2 * x + 2 * y + 3 * z)
+
+solver = cp_model.CpSolver()
+status = solver.Solve(model)
+
+if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+    print("Objective:", solver.ObjectiveValue())
+    print("x =", solver.Value(x))
+    print("y =", solver.Value(y))
+    print("z =", solver.Value(z))
+
+#cryptarithmetic
+
+from ortools.sat.python import cp_model
+
+model = cp_model.CpModel()
+
+S = model.NewIntVar(1, 9, "S")
+E = model.NewIntVar(0, 9, "E")
+N = model.NewIntVar(0, 9, "N")
+D = model.NewIntVar(0, 9, "D")
+
+M = model.NewIntVar(1, 9, "M")
+O = model.NewIntVar(0, 9, "O")
+R = model.NewIntVar(0, 9, "R")
+Y = model.NewIntVar(0, 9, "Y")
+
+# All letters must be different
+model.AddAllDifferent([S,E,N,D,M,O,R,Y])
+
+# SEND + MORE = MONEY
+model.Add(
+    1000*S + 100*E + 10*N + D +
+    1000*M + 100*O + 10*R + E
+    ==
+    10000*M + 1000*O + 100*N + 10*E + Y
+)
+
+solver = cp_model.CpSolver()
+status = solver.Solve(model)
+
+if status in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
+    print("S =", solver.Value(S))
+    print("E =", solver.Value(E))
+    print("N =", solver.Value(N))
+    print("D =", solver.Value(D))
+    print("M =", solver.Value(M))
+    print("O =", solver.Value(O))
+    print("R =", solver.Value(R))
+    print("Y =", solver.Value(Y))
+
+
+#lab 11
+
+#kmean
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv("Mall_Customers.csv")
+df = df.drop(columns=["CustomerID"])
+
+if "Gender" in df.columns:
+    df["Gender"] = df["Gender"].map({"Male": 0, "Female": 1})
+
+X = df.values
+
+kmeans1 = KMeans(n_clusters=5, random_state=42, n_init=10)
+labels1 = kmeans1.fit_predict(X)
+
+print("Without Scaling Inertia:", kmeans1.inertia_)
+
+df_scaled = df.copy()
+
+if "Age" in df_scaled.columns:
+    scaler_age = StandardScaler()
+    df_scaled["Age"] = scaler_age.fit_transform(df_scaled[["Age"]])
+
+scaler_all = StandardScaler()
+X_scaled = scaler_all.fit_transform(df_scaled)
+
+kmeans2 = KMeans(n_clusters=5, random_state=42, n_init=10)
+labels2 = kmeans2.fit_predict(X_scaled)
+
+print("With Scaling Inertia:", kmeans2.inertia_)
+
+plt.figure()
+plt.scatter(X[:, 2], X[:, 3], c=labels1)
+plt.title("Without Scaling")
+plt.show()
+
+plt.figure()
+plt.scatter(X_scaled[:, 2], X_scaled[:, 3], c=labels2)
+plt.title("With Scaling")
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
